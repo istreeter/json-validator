@@ -8,12 +8,10 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.json4s.jackson._
 import org.json4s.JValue
 
-class AppHandlers[F[_] : Sync : Http4sDsl] {
+class AppHandlers[F[_] : Sync : Http4sDsl](cache: SchemaCache[F]) {
 
   val dsl = implicitly[Http4sDsl[F]]
   import dsl._
-
-  def saveSchema(schema: JValue): F[String] = "ok".pure[F]
 
   def deserialize(request: Request[F], onError: => JValue) : F[Either[Response[F], JValue]] =
     request.as[JValue]
@@ -28,7 +26,7 @@ class AppHandlers[F[_] : Sync : Http4sDsl] {
     val eitherT : EitherT[F, Response[F], Response[F]] =
       for {
         schema <- EitherT(deserialize(request, Responses.schemaUploadErrorResponse(schemaId)))
-        _ <- EitherT.right(saveSchema(schema))
+        _ <- EitherT.right(cache.putSchema(schemaId, schema))
         content = Responses.schemaUploadResponse(schemaId)
         resp <- EitherT.right(Ok(content))
       } yield resp

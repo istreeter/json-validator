@@ -5,5 +5,6 @@ import cats.implicits._
 
 object Main extends IOApp {
   def run(args: List[String]) =
-    AppServer.stream[IO].compile.drain.as(ExitCode.Success)
+    AppServer.stream[IO](cache = IOSchemaCache)
+             .compile.drain.as(ExitCode.Success)
 }

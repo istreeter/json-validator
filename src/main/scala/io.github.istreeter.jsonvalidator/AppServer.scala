@@ -11,7 +11,8 @@ import scala.concurrent.ExecutionContext.global
 
 object AppServer {
 
-  def stream[F[_]: ConcurrentEffect](implicit T: Timer[F], C: ContextShift[F]): Stream[F, Nothing] = {
+  def stream[F[_]: ConcurrentEffect](cache: SchemaCache[F])
+                                    (implicit T: Timer[F], C: ContextShift[F]): Stream[F, Nothing] = {
     for {
       client <- BlazeClientBuilder[F](global).stream
 
@@ -20,7 +21,7 @@ object AppServer {
       // want to extract a segments not checked
       // in the underlying routes.
       httpApp = (
-        AppRoutes.routes[F]
+        AppRoutes.routes[F](cache)
       ).orNotFound
 
       // With Middlewares in place
