@@ -3,10 +3,12 @@ package io.github.istreeter.jsonvalidator
 import cats.data.{EitherT, OptionT}
 import cats.effect.Sync
 import cats.implicits._
-import org.http4s.{MalformedMessageBodyFailure, Request, Response}
+import org.http4s.{MalformedMessageBodyFailure, MediaType, Request, Response}
 import org.http4s.dsl.Http4sDsl
 import org.http4s.json4s.jackson._
+import org.http4s.headers.`Content-Type`
 import org.json4s.JValue
+import org.json4s.jackson.JsonMethods._
 
 class AppHandlers[F[_] : Sync : Http4sDsl](cache: SchemaCache[F]) {
 
@@ -18,7 +20,8 @@ class AppHandlers[F[_] : Sync : Http4sDsl](cache: SchemaCache[F]) {
     val eitherT : EitherT[F, Response[F], Response[F]] =
       for {
         schema <- EitherT(deserialize(request, Responses.schemaUploadErrorResponse(schemaId)))
-        _ <- EitherT.right(cache.putSchema(schemaId, schema))
+        json = compact(render(schema))
+        _ <- EitherT.right(cache.put(schemaId, json))
         content = Responses.schemaUploadResponse(schemaId)
         resp <- EitherT.right(Ok(content))
       } yield resp
@@ -30,8 +33,8 @@ class AppHandlers[F[_] : Sync : Http4sDsl](cache: SchemaCache[F]) {
 
     val optionT : OptionT[F, Response[F]] =
       for {
-        schema <- OptionT(cache.getSchema(schemaId))
-        resp <- OptionT.liftF(Ok(schema))
+        json <- OptionT(cache.get(schemaId))
+        resp <- OptionT.liftF(Ok(json, `Content-Type`(MediaType.application.json)))
       } yield resp
 
     optionT.getOrElseF(NotFound())

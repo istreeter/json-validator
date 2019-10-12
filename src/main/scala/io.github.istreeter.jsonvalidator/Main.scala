@@ -4,7 +4,19 @@ import cats.effect.{ExitCode, IO, IOApp}
 import cats.implicits._
 
 object Main extends IOApp {
-  def run(args: List[String]) =
-    AppServer.stream[IO](cache = IOSchemaCache)
-             .compile.drain.as(ExitCode.Success)
+
+  def run(args: List[String]) = {
+
+    val cache = new IOSchemaCache
+
+    val server =
+      AppServer.stream[IO](cache).compile.drain
+
+    for {
+      _ <- cache.init()
+      _ <- server
+    } yield ExitCode.Success
+
+  }
+
 }

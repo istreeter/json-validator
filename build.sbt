@@ -17,8 +17,8 @@ lazy val root = (project in file("."))
       "org.http4s"       %% "http4s-blaze-client"    % Http4sVersion,
       "org.http4s"       %% "http4s-dsl"             % Http4sVersion,
       "org.http4s"       %% "http4s-json4s-jackson"  % Http4sVersion,
-      "com.github.cb372" %% "scalacache-cats-effect" % "0.28.0",
-      "com.github.cb372" %% "scalacache-ehcache"     % "0.28.0",
+      "org.xerial"       %  "sqlite-jdbc"            % "3.28.0",
+      "org.tpolecat"     %% "doobie-core"            % "0.7.1",
       "org.specs2"       %% "specs2-core"            % Specs2Version % "test",
       "org.specs2"       %% "specs2-core"            % Specs2Version % "test",
       "ch.qos.logback"   %  "logback-classic"        % LogbackVersion
