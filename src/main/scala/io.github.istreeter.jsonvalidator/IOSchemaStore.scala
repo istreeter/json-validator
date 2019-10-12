@@ -28,7 +28,7 @@ class IOSchemaStore(implicit cs: ContextShift[IO]) extends SchemaStore[IO] {
     .transact(xa)
     .map(_ => ())
 
-  def put(schemaId: String, schema: String): IO[Unit] =
+  override def put(schemaId: String, schema: String): IO[Unit] =
     // The sql sugar converts this into a prepared statement;
     // It does not drop the string literals into the expression.
     sql"""INSERT OR REPLACE INTO jsonschema (name, json)
@@ -39,7 +39,7 @@ class IOSchemaStore(implicit cs: ContextShift[IO]) extends SchemaStore[IO] {
       .transact(xa)
       .map(_ => ())
 
-  def get(schemaId: String): IO[Option[String]] =
+  override def get(schemaId: String): IO[Option[String]] =
     // The sql sugar converts this into a prepared statement;
     // It does not drop the string literals into the expression.
     sql"""SELECT json FROM jsonschema WHERE name=$schemaId"""
