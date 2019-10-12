@@ -1,8 +1,7 @@
 package io.github.istreeter.jsonvalidator
 
 import org.json4s.JsonDSL._
-import org.json4s.JValue
-import org.json4s.JsonAST.JObject
+import org.json4s.{JValue, JArray, JObject}
 
 object Responses {
 
@@ -14,35 +13,48 @@ object Responses {
     def withStatus(status: String): JObject =
       obj ~ ("status" -> status)
 
-    def withMessage(message: String): JObject =
+    def withId(id: String): JObject =
+      obj ~ ("id" -> id)
+
+    def withMessage(message: JValue): JObject =
       obj ~ ("message" -> message)
 
   }
 
+  val Success = "success"
+  val Error = "error"
+  val UploadSchema = "uploadSchema"
+  val ValidateDocument = "validateDocument"
+  val InvalidJson = "Invalid JSON"
 
-  def idResponse(schemaId: String) : JObject =
-    ("id" -> schemaId)
 
-  def schemaUploadResponse(schemaId: String) : JValue =
-    idResponse(schemaId)
-      .withAction("uploadSchema")
-      .withStatus("success")
+  def forSchemaUploadOk(schemaId: String) : JValue =
+    JObject()
+      .withId(schemaId)
+      .withAction(UploadSchema)
+      .withStatus(Success)
 
-  def schemaUploadErrorResponse(schemaId: String) : JValue =
-    idResponse(schemaId)
-      .withAction("uploadSchema")
-      .withStatus("error")
-      .withMessage("Invalid JSON")
+  def forSchemaUploadUnparseable(schemaId: String) : JValue =
+    JObject()
+      .withId(schemaId)
+      .withAction(UploadSchema)
+      .withStatus(Error)
+      .withMessage(InvalidJson)
 
-  def validationOkResponse(schemaId: String) : JValue =
-    idResponse(schemaId)
-      .withAction("validateDocument")
-      .withStatus("success")
+  def forValidationOk(schemaId: String) : JValue =
+    JObject()
+      .withId(schemaId)
+      .withAction(ValidateDocument)
+      .withStatus(Success)
 
-  def validationErrorResponse(schemaId: String, msg: String) : JValue =
-    idResponse(schemaId)
-      .withAction("validateDocument")
-      .withStatus("error")
-      .withMessage(msg)
+  def forValidationError(schemaId: String, messages: Iterable[JValue]) : JValue =
+    JObject()
+      .withId(schemaId)
+      .withAction(ValidateDocument)
+      .withStatus(Error)
+      .withMessage(messages)
+
+  def forValidationUnparseable(schemaId: String) : JValue =
+    forValidationError(schemaId, List(("message" -> InvalidJson)))
 
 }

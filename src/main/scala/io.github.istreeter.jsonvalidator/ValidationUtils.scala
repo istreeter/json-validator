@@ -9,22 +9,21 @@ object ValidationUtils {
 
   lazy val fac : JsonSchemaFactory = JsonSchemaFactory.byDefault()
 
-  def validate(schema: JValue, document: JValue) : Either[Iterable[String], Unit] = {
-
-    val report = fac.getJsonSchema {
+  /**
+   * Validates a json document against a schema
+   * @param schema The schema against which to validate
+   * @param document The document to be validated
+   * @return An iterable describing any errors. An empty iterable implies the document is valid
+   */
+  def validate(schema: JValue, document: JValue) : Iterable[JValue] =
+    fac.getJsonSchema {
         JsonMethods.asJsonNode(schema)
       }
       .validate {
         JsonMethods.asJsonNode(document.noNulls)
       }
-
-    if (report.isSuccess) {
-      Right(())
-    } else {
-      Left {
-        report.asScala.map(_.getMessage)
-      }
-    }
-  }
+      .asScala
+      .map(_.asJson)
+      .map(JsonMethods.fromJsonNode)
 
 }

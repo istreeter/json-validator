@@ -6,30 +6,42 @@ import org.http4s.{HttpRoutes, Method}
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.Allow
 
-object AppRoutes {
+class AppRoutes[F[_]: Sync] {
 
-  def routes[F[_]: Sync](cache: SchemaCache[F]): HttpRoutes[F] = {
-    implicit val dsl = new Http4sDsl[F]{}
-    import dsl._
-    val handlers = new AppHandlers[F](cache)
+  implicit val dsl = new Http4sDsl[F]{}
+
+  import AppRoutes._
+  import dsl._
+
+  def routes(store: SchemaStore[F]): HttpRoutes[F] = {
+    val handlers = new AppHandlers[F](store)
 
     HttpRoutes.of[F] {
 
-      case req @ POST -> Root / "schema" / schemaId =>
+      case req @ POST -> Root / Schema / schemaId =>
         handlers.handlePostSchema(schemaId, req)
 
-      case (GET | HEAD) -> Root / "schema" / schemaId =>
+      case (GET | HEAD) -> Root / Schema / schemaId =>
         handlers.handleGetSchema(schemaId)
 
-      case (_ : Method) -> Root / "schema" / _ =>
+      case (_ : Method) -> Root / Schema / _ =>
         MethodNotAllowed(Allow(GET, HEAD, POST))
 
-      case req @ POST -> Root / "validate" / schemaId =>
+      case req @ POST -> Root / Validate / schemaId =>
         handlers.handleValidation(schemaId, req)
 
-      case (_ : Method) -> Root / "validate" =>
+      case (_ : Method) -> Root / Validate =>
         MethodNotAllowed(Allow(POST))
 
     }
   }
+}
+
+object AppRoutes {
+
+  def apply[F[_] : Sync] : AppRoutes[F] = new AppRoutes[F]
+
+  val Schema : String = "schema"
+  val Validate : String = "validate"
+
 }

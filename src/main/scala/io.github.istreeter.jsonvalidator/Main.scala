@@ -7,7 +7,7 @@ object Main extends IOApp {
 
   def run(args: List[String]) = {
 
-    val cache = new IOSchemaCache
+    val cache = new IOSchemaStore
 
     val server =
       AppServer.stream[IO](cache).compile.drain
