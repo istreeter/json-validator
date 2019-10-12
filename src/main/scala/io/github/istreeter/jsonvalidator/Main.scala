@@ -5,5 +5,5 @@ import cats.implicits._
 
 object Main extends IOApp {
   def run(args: List[String]) =
-    JsvonvalidatorServer.stream[IO].compile.drain.as(ExitCode.Success)
+    JsonvalidatorServer.stream[IO].compile.drain.as(ExitCode.Success)
 }

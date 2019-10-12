@@ -2,9 +2,10 @@ package io.github.istreeter.jsonvalidator
 
 import cats.Applicative
 import cats.implicits._
-import io.circe.{Encoder, Json}
 import org.http4s.EntityEncoder
-import org.http4s.circe._
+import org.http4s.json4s.jackson._
+import org.json4s.{JValue, Writer}
+import org.json4s.JsonDSL._
 
 trait HelloWorld[F[_]]{
   def hello(n: HelloWorld.Name): F[HelloWorld.Greeting]
@@ -20,12 +21,13 @@ object HelloWorld {
     * create encoders for your data.
     **/
   final case class Greeting(greeting: String) extends AnyVal
+
   object Greeting {
-    implicit val greetingEncoder: Encoder[Greeting] = new Encoder[Greeting] {
-      final def apply(a: Greeting): Json = Json.obj(
-        ("message", Json.fromString(a.greeting)),
-      )
+    implicit val geetingWriter: Writer[Greeting] = new Writer[Greeting] {
+      final def write(a: Greeting): JValue =
+        ("message" -> a.greeting)
     }
+
     implicit def greetingEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Greeting] =
       jsonEncoderOf[F, Greeting]
   }

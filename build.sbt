@@ -9,14 +9,16 @@ lazy val root = (project in file("."))
     name := "jsonvalidator",
     version := "0.0.1-SNAPSHOT",
     scalaVersion := "2.12.8",
+
+    fork in run := true,
+
     libraryDependencies ++= Seq(
-      "org.http4s"      %% "http4s-blaze-server" % Http4sVersion,
-      "org.http4s"      %% "http4s-blaze-client" % Http4sVersion,
-      "org.http4s"      %% "http4s-circe"        % Http4sVersion,
-      "org.http4s"      %% "http4s-dsl"          % Http4sVersion,
-      "io.circe"        %% "circe-generic"       % CirceVersion,
-      "org.specs2"      %% "specs2-core"         % Specs2Version % "test",
-      "ch.qos.logback"  %  "logback-classic"     % LogbackVersion
+      "org.http4s"     %% "http4s-blaze-server"   % Http4sVersion,
+      "org.http4s"     %% "http4s-blaze-client"   % Http4sVersion,
+      "org.http4s"     %% "http4s-dsl"            % Http4sVersion,
+      "org.http4s"     %% "http4s-json4s-jackson" % Http4sVersion,
+      "org.specs2"     %% "specs2-core"           % Specs2Version % "test",
+      "ch.qos.logback" %  "logback-classic"       % LogbackVersion
     ),
     addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.0")
