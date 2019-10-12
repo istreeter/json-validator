@@ -17,6 +17,9 @@ object AppRoutes {
       case req @ POST -> Root / "schema" / schemaId =>
         handlers.handlePostSchema(schemaId, req)
 
+      case req @ GET -> Root / "schema" / schemaId =>
+        handlers.handleGetSchema(schemaId)
+
     }
   }
 }
