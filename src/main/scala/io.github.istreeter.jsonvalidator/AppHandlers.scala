@@ -65,6 +65,12 @@ class AppHandlers[F[_] : Sync](store: SchemaStore[F])(implicit dsl: Http4sDsl[F]
   }
 
   /**
+   * A handler for the "/" endpoint. Describes the resource.
+   */
+  def handleRoot() : F[Response[F]] =
+    Ok(Responses.forRoot)
+
+  /**
    * Creates a response using the result returned from ValidationUtils
    * @param schemaId Identifies the schema
    * @param messages Error messages returned by the validator. An empty iterable implies the document is valid.

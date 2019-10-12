@@ -22,34 +22,34 @@ You can launch the server with sbt. The server will listen on port 8080:
 
     curl -XPOST http://localhost:8080/schema/my-schema -d '
       {
-	"$schema": "http://json-schema.org/draft-04/schema#",
-	"type": "object",
-	"properties": {
-	  "source": {
-	    "type": "string"
-	  },
-	  "destination": {
-	    "type": "string"
-	  },
-	  "timeout": {
-	    "type": "integer",
-	    "minimum": 0,
-	    "maximum": 32767
-	  },
-	  "chunks": {
-	    "type": "object",
-	    "properties": {
-	      "size": {
-		"type": "integer"
-	      },
-	      "number": {
-		"type": "integer"
-	      }
-	    },
-	    "required": ["size"]
-	  }
-	},
-	"required": ["source", "destination"]
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "destination": {
+            "type": "string"
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32767
+          },
+          "chunks": {
+            "type": "object",
+            "properties": {
+              "size": {
+            "type": "integer"
+              },
+              "number": {
+            "type": "integer"
+              }
+            },
+            "required": ["size"]
+          }
+        },
+        "required": ["source", "destination"]
       }'
 
 #### Check your schema exists
@@ -60,12 +60,12 @@ You can launch the server with sbt. The server will listen on port 8080:
 
     curl -XPOST http://localhost:8080/validate/my-schema -d '
       {
-	"source": "/home/alice/image.iso",
-	"destination": "/mnt/storage",
-	"timeout": null,
-	"chunks": {
-	  "size": 1024,
-	  "number": null
-	}
+        "source": "/home/alice/image.iso",
+        "destination": "/mnt/storage",
+        "timeout": null,
+        "chunks": {
+          "size": 1024,
+          "number": null
+        }
       }
     '

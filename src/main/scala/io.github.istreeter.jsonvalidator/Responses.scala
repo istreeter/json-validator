@@ -57,4 +57,21 @@ object Responses {
   def forValidationUnparseable(schemaId: String) : JValue =
     forValidationError(schemaId, List(("message" -> InvalidJson)))
 
+
+  /**
+   * A response to describe our resources at the "/" endpoint
+   */
+  def forRoot : JValue = {
+
+    def link(href: String, rel: String, method: String) =
+      ("href" -> href) ~ ("rel" -> rel) ~ ("method" -> method)
+
+    ("version" -> "1.0") ~
+    ("links" -> List(
+      link("/schema/{id}", "self", "GET"),
+      link("/schema/{id}", "edit", "POST"),
+      link("/validate/{id}", "validate", "POST")
+    ))
+  }
+
 }
