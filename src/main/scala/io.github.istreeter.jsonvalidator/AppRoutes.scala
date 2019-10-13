@@ -18,7 +18,7 @@ class AppRoutes[F[_]: Sync] {
 
     HttpRoutes.of[F] {
 
-      case GET -> Root =>
+      case (GET | HEAD) -> Root =>
         handlers.handleRoot()
 
       case req @ POST -> Root / Schema / schemaId =>
