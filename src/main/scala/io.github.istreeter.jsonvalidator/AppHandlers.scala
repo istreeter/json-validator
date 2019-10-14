@@ -22,7 +22,7 @@ class AppHandlers[F[_] : Sync](store: SchemaStore[F])(implicit dsl: Http4sDsl[F]
 
     val eitherT : EitherT[F, Response[F], Response[F]] =
       for {
-        schema <- EitherT(deserialize(request, Responses.forSchemaUploadUnparseable(schemaId)))
+        schema <- deserialize(request, onError = Responses.forSchemaUploadUnparseable(schemaId))
         json = JsonMethods.compact(schema)
         _ <- EitherT.right(store.put(schemaId, json))
         content = Responses.forSchemaUploadOk(schemaId)
@@ -39,7 +39,7 @@ class AppHandlers[F[_] : Sync](store: SchemaStore[F])(implicit dsl: Http4sDsl[F]
 
     val eitherT : EitherT[F, Response[F], Response[F]] =
       for {
-        json <- EitherT(getSchema(schemaId))
+        json <- getSchema(schemaId)
         resp <- EitherT.right(Ok(json, `Content-Type`(MediaType.application.json)))
       } yield resp
 
@@ -54,8 +54,8 @@ class AppHandlers[F[_] : Sync](store: SchemaStore[F])(implicit dsl: Http4sDsl[F]
 
     val eitherT : EitherT[F, Response[F], Response[F]] =
       for {
-        document <- EitherT(deserialize(request, Responses.forValidationUnparseable(schemaId)))
-        schemaJson <- EitherT(getSchema(schemaId))
+        document <- deserialize(request, onError = Responses.forValidationUnparseable(schemaId))
+        schemaJson <- getSchema(schemaId)
         schema = JsonMethods.parse(schemaJson)
         messages = ValidationUtils.validate(schema, document)
         resp <- EitherT.right(toValidationResponse(schemaId, messages))
@@ -88,24 +88,30 @@ class AppHandlers[F[_] : Sync](store: SchemaStore[F])(implicit dsl: Http4sDsl[F]
   /**
    * Helper to fetch a schema from the store, or return a bad response on error
    */
-  private def getSchema(schemaId: String) : F[Either[Response[F], String]] =
-    store.get(schemaId)
-      .flatMap {
-        case Some(json) => Applicative[F].pure(Right(json))
-        case None => NotFound().map(Left(_))
-      }
+  private def getSchema(schemaId: String) : EitherT[F, Response[F], String] = {
+    val result: F[Either[Response[F], String]] =
+      store.get(schemaId)
+        .flatMap {
+          case Some(json) => Applicative[F].pure(Right(json))
+          case None => NotFound().map(Left(_))
+        }
+    EitherT(result)
+  }
 
 
   /**
    * Helper to deserialize a request, or return a bad response on error
    */
-  private def deserialize(request: Request[F], onError: => JValue) : F[Either[Response[F], JValue]] =
-    request.as[JValue]
-      .map(Right(_) : Either[Response[F], JValue])
-      .handleErrorWith {
-        case e : MalformedMessageBodyFailure =>
-          BadRequest(onError).map(Left(_))
-      }
+  private def deserialize(request: Request[F], onError: => JValue) : EitherT[F, Response[F], JValue] = {
+    val result =
+      request.as[JValue]
+        .map(Right(_) : Either[Response[F], JValue])
+        .handleErrorWith {
+          case e : MalformedMessageBodyFailure =>
+            BadRequest(onError).map(Left(_))
+        }
+    EitherT(result)
+  }
 
 
 }
