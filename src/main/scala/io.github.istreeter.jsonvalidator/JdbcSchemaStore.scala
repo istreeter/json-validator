@@ -7,11 +7,7 @@ import doobie.implicits._
 /**
  * Implements the SchemaStore trait by wring schemas to a sqlite database
  */
-class IOSchemaStore(implicit cs: ContextShift[IO]) extends SchemaStore[IO] {
-
-  val xa = Transactor.fromDriverManager[IO](
-        "org.sqlite.JDBC", "jdbc:sqlite:jsonvalidator.db", "", ""
-    )
+class JdbcSchemaStore(xa: Transactor[IO])(implicit cs: ContextShift[IO]) extends SchemaStore[IO] {
 
   /**
    * Creates the database and initialises tables.
@@ -46,5 +42,22 @@ class IOSchemaStore(implicit cs: ContextShift[IO]) extends SchemaStore[IO] {
       .query[String]
       .option
       .transact(xa)
+
+}
+
+object JdbcSchemaStore {
+
+  def apply(driver: String = "org.sqlite.JDBC",
+            url: String = "jdbc:sqlite:jsonvalidator.db",
+            username: String = "",
+            password: String = "")(implicit cs: ContextShift[IO]): JdbcSchemaStore = {
+
+      val xa = Transactor.fromDriverManager[IO](
+            driver, url, username, password
+      )
+
+      new JdbcSchemaStore(xa)
+
+  }
 
 }

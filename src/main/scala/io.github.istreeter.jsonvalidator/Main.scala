@@ -7,13 +7,13 @@ object Main extends IOApp {
 
   def run(args: List[String]) = {
 
-    val cache = new IOSchemaStore
+    val store = JdbcSchemaStore()
 
     val server =
-      AppServer.stream[IO](cache).compile.drain
+      AppServer.stream[IO](store).compile.drain
 
     for {
-      _ <- cache.init()
+      _ <- store.init()
       _ <- server
     } yield ExitCode.Success
 
